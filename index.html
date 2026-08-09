@@ -372,8 +372,11 @@ button:active{transform:scale(.975)}
    </div>
   </div>
   <div class="card" id="storeCard" style="display:none">
-   <div class="ch"><span class="dot d3">🏬</span><div><div class="tt">สรุปยอดตามร้าน</div><div class="ss">รวมยอดเงินและระยะทางแยกตามปลายทาง</div></div></div>
-   <div id="storeSum"></div>
+   <div class="ch" id="storeToggle" style="cursor:pointer;margin-bottom:0" onclick="toggleStoreSum()">
+    <span class="dot d3">🏬</span><div><div class="tt">สรุปยอดตามร้าน</div><div class="ss">รวมยอดเงินและระยะทางแยกตามปลายทาง</div></div>
+    <span id="storeChev" style="margin-left:auto;color:var(--mute);font-size:13px;transition:transform .2s">▾</span>
+   </div>
+   <div id="storeSum" style="overflow:hidden;max-height:2000px;transition:max-height .25s ease"></div>
   </div>
   <div id="list"></div>
  </div>
@@ -660,11 +663,25 @@ function renderStoreSum(byStore,fTo){
  box.innerHTML=h;
  var els=box.getElementsByClassName('strow');
  for(var i=0;i<els.length;i++)els[i].onclick=(function(nm){return function(){pickStoreFilter(nm)}})(els[i].getAttribute('data-store'));
+ applyStoreSumState();
 }
 function pickStoreFilter(name){
  var sel=$('f_fto');if(!sel)return;
  sel.value=(sel.value===name)?'':name;
  render();
+}
+var SSK='bigc_storesum_collapsed';
+function storeSumCollapsed(){try{return localStorage.getItem(SSK)==='1'}catch(e){return false}}
+function applyStoreSumState(){
+ var box=$('storeSum'),chev=$('storeChev');if(!box||!chev)return;
+ var c=storeSumCollapsed();
+ box.style.maxHeight=c?'0px':(box.scrollHeight+'px');
+ chev.style.transform=c?'rotate(-90deg)':'rotate(0deg)';
+}
+function toggleStoreSum(){
+ var c=!storeSumCollapsed();
+ try{localStorage.setItem(SSK,c?'1':'0')}catch(e){}
+ applyStoreSumState();
 }
 function more(){shown+=PAGE;render(false)}
 var _db;function deb(){clearTimeout(_db);_db=setTimeout(function(){render()},180)}
