@@ -202,6 +202,13 @@ button:active{transform:scale(.975)}
 .empty b{display:block;font-size:16px;font-weight:900;margin-bottom:5px}
 .empty span{font-size:13.5px;color:var(--mute)}
 .srch{margin-bottom:12px}
+.row select{flex:1;min-width:128px;height:44px}
+.strow{display:flex;align-items:center;gap:9px;padding:10px 4px;border-bottom:1px solid var(--line);cursor:pointer}
+.strow:last-child{border-bottom:0}
+.strow:active{background:#F5FBF8}
+.strow .nm{flex:1;min-width:0;font-size:13.5px;font-weight:800;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.strow .cn{font-size:11px;color:var(--mute);font-weight:700;white-space:nowrap}
+.strow .am{font-size:13px;font-weight:900;color:var(--deep);white-space:nowrap}
 /* ── install hint ── */
 .inst{position:fixed;left:12px;right:12px;bottom:calc(88px + env(safe-area-inset-bottom));
  background:#fff;border-radius:18px;padding:14px 15px;z-index:60;display:none;
@@ -347,6 +354,13 @@ button:active{transform:scale(.975)}
   <div class="card">
    <input class="srch" id="srch" placeholder="🔍 ค้นหา ชื่อ / แผนก / ปลายทาง / ใบเสร็จ" oninput="deb()">
    <div class="row">
+    <select id="f_fdept" onchange="render()"><option value="">ทุกแผนก</option></select>
+    <select id="f_fto" onchange="render()"><option value="">ทุกร้าน/ปลายทาง</option></select>
+   </div>
+   <div class="row" style="margin-top:9px">
+    <button class="b-s" onclick="clrFilter()">✕ ล้างตัวกรอง</button>
+   </div>
+   <div class="row" style="margin-top:9px">
     <button class="b-g" onclick="syncNow()">🔄 ซิงค์ข้อมูล</button>
     <button class="b-o" onclick="fbTest()">🔌 ทดสอบเชื่อมต่อ</button>
     <button class="b-g" onclick="xls()">ส่งออก Excel (มีรูป)</button>
@@ -356,6 +370,10 @@ button:active{transform:scale(.975)}
     <button class="b-s" onclick="logout()">ออกจากระบบ</button>
     <button class="b-s" style="color:var(--coral)" onclick="clr()">ล้างข้อมูลทั้งหมด</button>
    </div>
+  </div>
+  <div class="card" id="storeCard" style="display:none">
+   <div class="ch"><span class="dot d3">🏬</span><div><div class="tt">สรุปยอดตามร้าน</div><div class="ss">รวมยอดเงินและระยะทางแยกตามปลายทาง</div></div></div>
+   <div id="storeSum"></div>
   </div>
   <div id="list"></div>
  </div>
@@ -563,13 +581,38 @@ function esc(s){return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'
 function updCnt(){$('cnt').textContent=rows.length}
 
 var PAGE=30, shown=PAGE;
+function fillFilters(){
+ var dSel=$('f_fdept'),tSel=$('f_fto');if(!dSel||!tSel)return;
+ var dCur=dSel.value,tCur=tSel.value;
+ var depts=memField('dept'),tos=memField('to');
+ var dh='<option value="">ทุกแผนก</option>';
+ for(var i=0;i<depts.length;i++)dh+='<option value="'+xe(depts[i].name)+'">'+esc(depts[i].name)+'</option>';
+ var th='<option value="">ทุกร้าน/ปลายทาง</option>';
+ tos.sort(function(a,b){return a.name.localeCompare(b.name,'th')});
+ for(var i=0;i<tos.length;i++)th+='<option value="'+xe(tos[i].name)+'">'+esc(tos[i].name)+'</option>';
+ dSel.innerHTML=dh;tSel.innerHTML=th;
+ dSel.value=dCur;tSel.value=tCur;
+}
+function clrFilter(){
+ $('srch').value='';$('f_fdept').value='';$('f_fto').value='';render();
+}
 function render(reset){
  if(reset!==false)shown=PAGE;
+ fillFilters();
  var q=(($('srch')||{}).value||'').toLowerCase();
- var t=0,sumAmt=0,match=[];
- for(var i=0;i<rows.length;i++){var r=rows[i];t+=r.dt;sumAmt+=(r.amt||0);
+ var fDept=(($('f_fdept')||{}).value||'');
+ var fTo=(($('f_fto')||{}).value||'');
+ var t=0,sumAmt=0,match=[],byStore={};
+ for(var i=0;i<rows.length;i++){var r=rows[i];
   var blob=(r.name+' '+r.dept+' '+r.to+' '+r.rec+' '+r.plate+' '+r.date).toLowerCase();
-  if(!q||blob.indexOf(q)>=0)match.push(i);
+  if(q&&blob.indexOf(q)<0)continue;
+  if(fDept&&r.dept!==fDept)continue;
+  if(fTo&&r.to!==fTo)continue;
+  match.push(i);
+  t+=r.dt;sumAmt+=(r.amt||0);
+  var sk=(r.to||'').trim()||'(ไม่ระบุปลายทาง)';
+  if(!byStore[sk])byStore[sk]={name:sk,n:0,amt:0,dt:0};
+  byStore[sk].n++;byStore[sk].amt+=(r.amt||0);byStore[sk].dt+=r.dt;
  }
  var lim=Math.min(shown,match.length),h=[];
  for(var j=0;j<lim;j++){
@@ -593,11 +636,35 @@ function render(reset){
      +((r.th2||r.im2)?'<img loading="lazy" src="'+(r.th2||r.im2)+'" onclick="zoom(\''+r.id+'_2\')">':'')+'</div>':'')
    +'</div></div>');
  }
+ var filtered=!!(q||fDept||fTo);
  if(match.length>lim)h.push('<button class="b-o" style="width:100%;margin-bottom:12px" onclick="more()">แสดงเพิ่ม ('+(match.length-lim)+' รายการ)</button>');
- $('list').innerHTML=h.join('')||'<div class="empty"><div class="em">'+(q?'🔍':'📦')+'</div><b>'+(q?'ไม่พบรายการที่ค้นหา':'ยังไม่มีรายการบันทึก')+'</b><span>'+(q?'ลองใช้คำค้นอื่น':'เริ่มบันทึกได้ที่แท็บกรอกข้อมูล')+'</span></div>';
- $('s1').innerHTML=rows.length+'<small>รายการ</small>';
+ $('list').innerHTML=h.join('')||'<div class="empty"><div class="em">'+(filtered?'🔍':'📦')+'</div><b>'+(filtered?'ไม่พบรายการที่ตรงเงื่อนไข':'ยังไม่มีรายการบันทึก')+'</b><span>'+(filtered?'ลองปรับคำค้นหรือตัวกรอง':'เริ่มบันทึกได้ที่แท็บกรอกข้อมูล')+'</span></div>';
+ $('s1').innerHTML=match.length+'<small>รายการ</small>';
  $('s2').innerHTML=t.toFixed(1)+'<small>กม.</small>';
  if($('s3'))$('s3').innerHTML='฿'+money(sumAmt);
+ renderStoreSum(byStore,fTo);
+}
+function renderStoreSum(byStore,fTo){
+ var box=$('storeSum'),card=$('storeCard');if(!box||!card)return;
+ var list=[];for(var k in byStore)list.push(byStore[k]);
+ if(!list.length){card.style.display='none';return}
+ card.style.display='block';
+ list.sort(function(a,b){return b.amt-a.amt});
+ var h='';
+ for(var i=0;i<list.length;i++){var s=list[i];
+  h+='<div class="strow" data-store="'+xe(s.name)+'">'
+   +'<span class="nm">'+esc(s.name)+(fTo===s.name?' ✓':'')+'</span>'
+   +'<span class="cn">'+s.n+' ครั้ง · '+s.dt.toFixed(1)+' กม.</span>'
+   +'<span class="am">฿'+money(s.amt)+'</span></div>';
+ }
+ box.innerHTML=h;
+ var els=box.getElementsByClassName('strow');
+ for(var i=0;i<els.length;i++)els[i].onclick=(function(nm){return function(){pickStoreFilter(nm)}})(els[i].getAttribute('data-store'));
+}
+function pickStoreFilter(name){
+ var sel=$('f_fto');if(!sel)return;
+ sel.value=(sel.value===name)?'':name;
+ render();
 }
 function more(){shown+=PAGE;render(false)}
 var _db;function deb(){clearTimeout(_db);_db=setTimeout(function(){render()},180)}
