@@ -744,7 +744,7 @@ function zoom(key){
 }
 function dl(b,n){var u=URL.createObjectURL(b),a=document.createElement('a');a.href=u;a.download=n;a.click();setTimeout(function(){URL.revokeObjectURL(u)},2000)}
 function xe(s){return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;')}
-var HDR=['ลำดับ','วันที่ส่ง','ชื่อผู้ส่ง','แผนก','ประเภทรถ','ทะเบียนรถ','จุดเริ่มต้น','จุดหมาย','ระยะทาง(กม.) (ขาไป)','ระยะทาง(กม.) (ขากลับ)','ระยะทาง (กม.) (ไป-กลับ)','เลขที่ใบเสร็จ','ยอดเงิน (บาท)','Google Maps','รูปส่งสินค้า','หมายเหตุ'];
+var HDR=['ลำดับ','วันที่ส่ง','ชื่อผู้ส่ง','แผนก','ประเภทรถ','ทะเบียนรถ','จุดเริ่มต้น','จุดหมาย','ระยะทาง(กม.) (ขาไป)','ระยะทาง(กม.) (ขากลับ)','ระยะทาง (กม.) (ไป-กลับ)','เลขที่ใบเสร็จ','ยอดเงิน (บาท)','Google Maps','รูปส่งสินค้า','รูปใบเสร็จ 1','รูปใบเสร็จ 2','รูปใบเสร็จ 3','หมายเหตุ'];
 /* ===== XLSX writer with embedded images (no CDN) ===== */
 var CRCT=(function(){var t=[],c,n,k;for(n=0;n<256;n++){c=n;for(k=0;k<8;k++)c=c&1?0xEDB88320^(c>>>1):c>>>1;t[n]=c>>>0}return t})();
 function crc32(u8){var c=0xFFFFFFFF;for(var i=0;i<u8.length;i++)c=CRCT[(c^u8[i])&0xFF]^(c>>>8);return (c^0xFFFFFFFF)>>>0}
@@ -790,8 +790,8 @@ function EMU(px){return Math.round(px*9525)}
 /* builds xlsx parts; shared by browser + node test */
 function buildXlsx(rows, HDR, imgs){
  // imgs: array of {row, col, bin(Uint8Array), ext}
- var W=[6,11,11.3,16,17.3,11.3,13.1,11.7,13.6,13.6,13.6,19.6,13,30,30,20];
- var NC=16;
+ var W=[6,11,11.3,16,17.3,11.3,13.1,11.7,13.6,13.6,13.6,19.6,13,30,30,22,22,22,20];
+ var NC=19;
  var ss=[], ssMap={};
  function si(t){var k='\u0000'+t;if(ssMap[k]===undefined){ssMap[k]=ss.length;ss.push(t)}return ssMap[k]}
 
@@ -828,10 +828,13 @@ function buildXlsx(rows, HDR, imgs){
   sheet+='<c r="M'+rn+'" s="6"><v>'+(r.amt||0)+'</v></c>';
   sheet+='<c r="N'+rn+'" s="4"/>';
   sheet+='<c r="O'+rn+'" s="4"/>';
-  sheet+='<c r="P'+rn+'" s="4" t="s"><v>'+si(r.note||'')+'</v></c>';
+  sheet+='<c r="P'+rn+'" s="4"/>';
+  sheet+='<c r="Q'+rn+'" s="4"/>';
+  sheet+='<c r="R'+rn+'" s="4"/>';
+  sheet+='<c r="S'+rn+'" s="4" t="s"><v>'+si(r.note||'')+'</v></c>';
   sheet+='</row>';
  }
- sheet+='</sheetData><mergeCells count="1"><mergeCell ref="A1:P1"/></mergeCells>';
+ sheet+='</sheetData><mergeCells count="1"><mergeCell ref="A1:S1"/></mergeCells>';
  if(imgs.length)sheet+='<drawing r:id="rId1"/>';
  sheet+='</worksheet>';
 
@@ -932,10 +935,11 @@ function xls(){
  var jobs=[];
  for(var i=0;i<rows.length;i++){
   (function(r,ri){
-   if(r.th1||r.im1)jobs.push(imgGet(r.id+'_1').then(function(d){
-    d=d||r.im1;return d?{row:ri+2,col:13,bin:b64bin(d.split(',')[1])}:null}));
-   if(r.th2||r.im2)jobs.push(imgGet(r.id+'_2').then(function(d){
-    d=d||r.im2;return d?{row:ri+2,col:14,bin:b64bin(d.split(',')[1])}:null}));
+   var _loop=function(n){
+    if(r['th'+n]||r['im'+n])jobs.push(imgGet(r.id+'_'+n).then(function(d){
+     d=d||r['im'+n];return d?{row:ri+2,col:12+n,bin:b64bin(d.split(',')[1])}:null}));
+   };
+   for(var n=1;n<=5;n++)_loop(n);
   })(rows[i],i);
  }
  Promise.all(jobs).then(function(res){
@@ -953,7 +957,9 @@ function csv(){
  if(!rows.length){alert('ยังไม่มีข้อมูลให้ส่งออก');return}
  var o=HDR.join(',')+'\n';
  for(var i=0;i<rows.length;i++){var r=rows[i];
-  o+=[i+1,q2(r.date),q2(r.name),q2(r.dept),q2(r.veh),q2(r.plate),q2(r.from),q2(r.to),r.d1,r.d2,r.dt,q2(r.rec),(r.amt||0),(r.th1||r.im1)?'มีรูป':'',(r.th2||r.im2)?'มีรูป':'',q2(r.note)].join(',')+'\n'}
+  o+=[i+1,q2(r.date),q2(r.name),q2(r.dept),q2(r.veh),q2(r.plate),q2(r.from),q2(r.to),r.d1,r.d2,r.dt,q2(r.rec),(r.amt||0),
+   (r.th1||r.im1)?'มีรูป':'',(r.th2||r.im2)?'มีรูป':'',(r.th3||r.im3)?'มีรูป':'',(r.th4||r.im4)?'มีรูป':'',(r.th5||r.im5)?'มีรูป':'',
+   q2(r.note)].join(',')+'\n'}
  dl(new Blob(['\uFEFF'+o],{type:'text/csv;charset=utf-8'}),'บันทึกประวัติการส่งสินค้า.csv');
 }
 /* ═══ ซิงค์ข้อมูลกับ Firestore (REST API — ไม่ใช้ SDK/CDN) ═══ */
