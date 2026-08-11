@@ -317,6 +317,8 @@ button:active{transform:scale(.975)}
      <input type="number" step="0.01" inputmode="decimal" id="f_amt" placeholder="0.00" oninput="calcAmt()"></div>
    <div class="f"><label>รูป Google Maps</label><input type="file" accept="image/*" id="f_img1"></div>
    <div class="f"><label>รูปส่งสินค้า</label><input type="file" accept="image/*" id="f_img2"></div>
+   <div class="f"><label>รูปใบเสร็จ <span id="btnAddRec" onclick="addRecSlot()" style="cursor:pointer;color:var(--mint);font-weight:800;font-size:11px">+ เพิ่มรูป</span></label>
+     <div id="recSlots"><input type="file" accept="image/*" id="f_img3"></div></div>
    <div class="f wide"><label>หมายเหตุ</label><input id="f_note" value="-"></div>
   </div>
   <button class="b-main" onclick="add()">บันทึกรายการส่งสินค้า</button>
@@ -540,30 +542,61 @@ function rd(f,cb){
 }
 function fmtd(d){if(!d)return '';var p=d.split('-');return p[2]+'/'+p[1]+'/'+p[0]}
 
+/* รูปใบเสร็จ — เพิ่มได้สูงสุด 3 รูป (f_img3, f_img4, f_img5) */
+var recSlotCount=3;
+function addRecSlot(){
+ if(recSlotCount>=5)return;
+ recSlotCount++;
+ var inp=document.createElement('input');
+ inp.type='file';inp.accept='image/*';inp.id='f_img'+recSlotCount;
+ inp.style.marginTop='8px';
+ $('recSlots').appendChild(inp);
+ if(recSlotCount>=5)$('btnAddRec').style.display='none';
+}
+function resetRecSlots(){
+ var wrap=$('recSlots');
+ while(wrap.children.length>1)wrap.removeChild(wrap.lastChild);
+ recSlotCount=3;
+ $('btnAddRec').style.display='';
+}
+var IMG_IDS=['f_img1','f_img2','f_img3','f_img4','f_img5'];
+function readImgsSeq(ids,i,results,cb){
+ if(i>=ids.length)return cb(results);
+ var el=$(ids[i]);
+ rd(el?el.files[0]:null,function(res){
+  results.push(res);
+  readImgsSeq(ids,i+1,results,cb);
+ });
+}
+
 function add(){
  if(!v('f_date')||!v('f_name')){
   toast('ต้องระบุวันที่ส่งและชื่อผู้ส่งก่อนบันทึก',1);
   if(!v('f_name'))$('f_name').focus();
   return;
  }
- rd($('f_img1').files[0],function(i1){
- rd($('f_img2').files[0],function(i2){
+ readImgsSeq(IMG_IDS,0,[],function(results){
   var a=parseFloat(v('f_d1'))||0,b=parseFloat(v('f_d2'))||0;
   var id='r'+Date.now()+Math.random().toString(36).slice(2,7);
-  rows.push({id:id,date:fmtd(v('f_date')),name:v('f_name'),dept:v('f_dept'),veh:v('f_veh'),plate:v('f_plate'),
+  var row={id:id,date:fmtd(v('f_date')),name:v('f_name'),dept:v('f_dept'),veh:v('f_veh'),plate:v('f_plate'),
    from:v('f_from'),to:v('f_to'),d1:a,d2:b,dt:a+b,rec:v('f_rec'),
    amt:parseFloat(v('f_amt'))||0,
-   th1:i1?i1.th:'',th2:i2?i2.th:'',
-   im1:i1?i1.sync:'',im2:i2?i2.sync:'',
-   note:v('f_note')||'-'});
-  if(i1)imgPut(id+'_1',i1.full);
-  if(i2)imgPut(id+'_2',i2.full);
+   note:v('f_note')||'-'};
+  for(var n=0;n<results.length;n++){
+   var res=results[n],idx=n+1;
+   row['th'+idx]=res?res.th:'';
+   row['im'+idx]=res?res.sync:'';
+   if(res)imgPut(id+'_'+idx,res.full);
+  }
+  rows.push(row);
   save();qAdd('set',id);syncNow2();
   ['f_name','f_plate','f_to','f_d1','f_d2','f_rec','f_amt'].forEach(function(x){$(x).value=''});
-  $('f_img1').value='';$('f_img2').value='';calc();
+  IMG_IDS.forEach(function(x){var el=$(x);if(el)el.value=''});
+  resetRecSlots();calc();
   toast('บันทึกแล้ว · รวมทั้งหมด '+rows.length+' รายการ',0);
   updCnt();refreshQuick();
- })})}
+ });
+}
 function toast(m,isErr){
  var t=$('toast');t.textContent=(isErr?'⚠️ ':'✅ ')+m;
  t.className='toast on '+(isErr?'no':'ok');
@@ -572,7 +605,7 @@ function toast(m,isErr){
 function del(i){
  if(!confirm('ลบรายการนี้ออกจากบันทึก?'))return;
  var r=rows[i];
- if(r.id){imgDel(r.id+'_1');imgDel(r.id+'_2');qAdd('del',r.id)}
+ if(r.id){for(var n=1;n<=5;n++)imgDel(r.id+'_'+n);qAdd('del',r.id)}
  rows.splice(i,1);save();render();updCnt();refreshQuick();pushQueue();
 }
 function money(n){
@@ -581,6 +614,14 @@ function money(n){
 }
 function calcAmt(){}
 function esc(s){return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')}
+function thumbsHtml(r){
+ var h='';
+ for(var n=1;n<=5;n++){
+  var src=r['th'+n]||r['im'+n];
+  if(src)h+='<img loading="lazy" src="'+src+'" onclick="zoom(\''+r.id+'_'+n+'\')">';
+ }
+ return h?'<div class="thumbs">'+h+'</div>':'';
+}
 function updCnt(){$('cnt').textContent=rows.length}
 
 var PAGE=30, shown=PAGE;
@@ -634,9 +675,7 @@ function render(reset){
    +'<dt>ใบเสร็จ</dt><dd>'+esc(r.rec||'—')+'</dd>'
    +(r.amt?'<dt>ยอดเงิน</dt><dd><span class="baht">฿'+money(r.amt)+'</span></dd>':'')
    +'<dt>หมายเหตุ</dt><dd>'+esc(r.note||'—')+'</dd></dl>'
-   +((r.th1||r.th2||r.im1||r.im2)?'<div class="thumbs">'
-     +((r.th1||r.im1)?'<img loading="lazy" src="'+(r.th1||r.im1)+'" onclick="zoom(\''+r.id+'_1\')">':'')
-     +((r.th2||r.im2)?'<img loading="lazy" src="'+(r.th2||r.im2)+'" onclick="zoom(\''+r.id+'_2\')">':'')+'</div>':'')
+   +thumbsHtml(r)
    +'</div></div>');
  }
  var filtered=!!(q||fDept||fTo);
@@ -687,7 +726,7 @@ function more(){shown+=PAGE;render(false)}
 var _db;function deb(){clearTimeout(_db);_db=setTimeout(function(){render()},180)}
 function clr(){
  if(!confirm('ล้างข้อมูลทั้งหมด?\nแนะนำให้ส่งออกไฟล์เก็บไว้ก่อน'))return;
- for(var i=0;i<rows.length;i++){if(rows[i].id){imgDel(rows[i].id+'_1');imgDel(rows[i].id+'_2');qAdd('del',rows[i].id)}}
+ for(var i=0;i<rows.length;i++){if(rows[i].id){for(var n=1;n<=5;n++)imgDel(rows[i].id+'_'+n);qAdd('del',rows[i].id)}}
  rows=[];save();render();updCnt();refreshQuick();
  pushQueue().then(function(){showSyncState()});
 }
@@ -696,7 +735,7 @@ function zoom(key){
   if(!d){
    /* ไม่มีรูปเต็มในเครื่องนี้ -> ใช้รูปที่ซิงค์มา */
    var id=key.slice(0,-2), n=key.slice(-1);
-   for(var i=0;i<rows.length;i++)if(rows[i].id===id){d=(n==='1')?rows[i].im1:rows[i].im2;break}
+   for(var i=0;i<rows.length;i++)if(rows[i].id===id){d=rows[i]['im'+n];break}
   }
   if(!d)return toast('ไม่พบรูปภาพ',1);
   var w=window.open('');
@@ -777,7 +816,7 @@ function buildXlsx(rows, HDR, imgs){
 
  // data rows
  for(var i=0;i<rows.length;i++){
-  var r=rows[i], rn=i+3, hasImg=(r.th1||r.th2||r.im1||r.im2);
+  var r=rows[i], rn=i+3, hasImg=(r.th1||r.th2||r.im1||r.im2||r.im3||r.im4||r.im5);
   sheet+='<row r="'+rn+'" ht="'+(hasImg?110:26)+'" customHeight="1">';
   sheet+='<c r="A'+rn+'" s="3"><v>'+(i+1)+'</v></c>';
   var sv=[r.date,r.name,r.dept,r.veh,r.plate,r.from,r.to];
@@ -997,19 +1036,19 @@ var FS_MAX=980000;  /* Firestore จำกัด ~1MB ต่อ document */
 function toFs(o){
  var f={};
  for(var k in o){
-  if(k==='th1'||k==='th2')continue;           /* ภาพย่อสร้างใหม่ได้ ไม่ต้องส่ง */
+  if(/^th[1-5]$/.test(k))continue;             /* ภาพย่อสร้างใหม่ได้ ไม่ต้องส่ง */
   var v=o[k];
   if(v===null||v===undefined)continue;
   if(typeof v==='number')f[k]={doubleValue:v};
   else f[k]={stringValue:String(v)};
  }
- f.hasImg={booleanValue:!!(o.th1||o.th2||o.im1||o.im2)};
+ var anyImg=false;
+ for(var n=1;n<=5;n++)if(o['th'+n]||o['im'+n])anyImg=true;
+ f.hasImg={booleanValue:anyImg};
  var out={fields:f};
- /* ถ้าใหญ่เกิน ตัดรูปออกเพื่อให้ข้อความยังซิงค์ได้ */
- if(JSON.stringify(out).length>FS_MAX){
-  delete f.im2;
-  if(JSON.stringify(out).length>FS_MAX)delete f.im1;
- }
+ /* ถ้าใหญ่เกิน ตัดรูปออกเพื่อให้ข้อความยังซิงค์ได้ (ตัดรูปใบเสร็จก่อน แล้วค่อยรูปหลัก) */
+ var dropOrder=['im5','im4','im3','im2','im1'];
+ for(var oi=0;oi<dropOrder.length&&JSON.stringify(out).length>FS_MAX;oi++)delete f[dropOrder[oi]];
  return out;
 }
 function fromFs(d){
@@ -1112,12 +1151,13 @@ function pullAll(){
     o.id=id;
     if(byId[id]){
      /* ของในเครื่องมีอยู่แล้ว: เก็บ thumbnail เดิมไว้ */
-     var keep1=byId[id].th1,keep2=byId[id].th2;
+     var keep=[];for(var n=1;n<=5;n++)keep[n]=byId[id]['th'+n];
      for(var k in o)byId[id][k]=o[k];
-     byId[id].th1=keep1;byId[id].th2=keep2;
-     if((!keep1&&byId[id].im1)||(!keep2&&byId[id].im2))mkThumb(byId[id]);
+     var needThumb=false;
+     for(var n=1;n<=5;n++){byId[id]['th'+n]=keep[n];if(!keep[n]&&byId[id]['im'+n])needThumb=true}
+     if(needThumb)mkThumb(byId[id]);
     }else{
-     o.th1='';o.th2='';
+     for(var n=1;n<=5;n++)o['th'+n]='';
      rows.push(o);byId[id]=o;added++;
      mkThumb(o);
     }
@@ -1155,13 +1195,11 @@ function fbTest(){
 }
 /* สร้างภาพย่อจากรูปที่ซิงค์มาจากเครื่องอื่น */
 function mkThumb(o){
- var need=0,done=0;
- if(o.im1&&!o.th1)need++;
- if(o.im2&&!o.th2)need++;
+ var need=0,done=0,ns=[];
+ for(var n=1;n<=5;n++)if(o['im'+n]&&!o['th'+n]){need++;ns.push(n)}
  if(!need)return;
  function fin(){if(++done>=need){save();render(false)}}
- if(o.im1&&!o.th1)shrink(o.im1,110,0.5,function(t){o.th1=t||'';fin()});
- if(o.im2&&!o.th2)shrink(o.im2,110,0.5,function(t){o.th2=t||'';fin()});
+ ns.forEach(function(n){shrink(o['im'+n],110,0.5,function(t){o['th'+n]=t||'';fin()})});
 }
 /* ซิงค์ทันทีหลังกดบันทึก (ทำงานเงียบๆ ไม่ขัดจังหวะผู้ใช้) */
 function syncNow2(){
