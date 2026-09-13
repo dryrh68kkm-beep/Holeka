@@ -1185,14 +1185,26 @@ function pullAll(){
 
 function fbTest(){
  setSync('wait','⏳ กำลังทดสอบการเชื่อมต่อ...');
- authHdr().then(function(H){return fetch(fbUrl(FB.col,'&pageSize=1'),{headers:H})})
+ authHdr().then(function(H){
+  return fetch('https://firestore.googleapis.com/v1/projects/'+FB.projectId
+   +'/databases/(default)/documents:runAggregationQuery?key='+FB.apiKey,{
+   method:'POST',headers:H,
+   body:JSON.stringify({structuredAggregationQuery:{structuredQuery:{from:[{collectionId:FB.col}]},aggregations:[{alias:'c',count:{}}]}})
+  });
+ })
   .then(function(r){return r.json().then(function(j){return {s:r.status,j:j}})})
   .then(function(x){
-   if(x.j.error){
-    setSync('err','❌ HTTP '+x.s+' · '+(x.j.error.status||'')+' — '+x.j.error.message);
-   }else{
-    setSync('ok','✅ เชื่อมต่อ Firestore สำเร็จ (พบ '+((x.j.documents||[]).length)+' รายการบนเซิร์ฟเวอร์)');
+   var j=x.j, err=(j&&j.error)||(Array.isArray(j)&&j[0]&&j[0].error);
+   if(err){
+    setSync('err','❌ HTTP '+x.s+' · '+(err.status||'')+' — '+err.message);
+    return;
    }
+   var cnt=0;
+   try{
+    var af=j[0].result.aggregateFields.c;
+    cnt=Number(af.integerValue!==undefined?af.integerValue:af.doubleValue)||0;
+   }catch(e){}
+   setSync('ok','✅ เชื่อมต่อ Firestore สำเร็จ (มีทั้งหมด '+cnt+' รายการบนเซิร์ฟเวอร์)');
   })
   .catch(function(e){
    if(e.message==='NEED_LOGIN'){setSync('err','❌ กรุณาเข้าสู่ระบบใหม่');unlocked=false;showRep();return}
