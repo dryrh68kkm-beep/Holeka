@@ -3,6 +3,7 @@
 ## Comparison target
 
 - Source visual truth: the user-provided mobile screenshots and the approved individual 3D delivery-icon set shown in this conversation.
+- Selected header reference: `/workspace/scratch/0f986b3a25fb/generated_images/exec-92ea7775-0b9b-4c11-909e-96b3df370e08.png`.
 - Implementation: `index.html` with `assets/*.png`.
 - Intended viewport: mobile, 393 × 852 CSS px, device scale factor 1.
 - Intended state: form tab, empty report state, and report action panel.
@@ -41,5 +42,7 @@
 ## Comparison history
 
 - Iteration 1: added generated delivery icon assets and vivid report-aligned UI styling; static checks passed; rendered capture blocked.
+- Iteration 2: replaced the HOLEKA arrow mark with the project’s 3D delivery-truck asset and tightened the header copy/spacing to match the selected reference; static checks passed. A fresh cloud-browser attempt again returned `net::ERR_CONNECTION_REFUSED` for `http://terminal.local:4173/`.
+- Iteration 3: added a dedicated 256 × 256 3D delivery-truck PNG for the browser, PWA manifest, and iPhone home-screen icon; static checks passed. Rendered capture remains blocked by the same local-preview connection failure.
 
 final result: blocked
