@@ -3,8 +3,8 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<meta name="theme-color" content="#0B7A5C">
-<title>บันทึกการส่งสินค้า | Big C ไทรน้อย</title>
+<meta name="theme-color" content="#075B48">
+<title>HOLEKA | บันทึกการส่งสินค้า</title>
 <link rel="apple-touch-icon" href="data:image/svg+xml,<svg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%20180%20180'><defs><linearGradient%20id='g'%20x1='0'%20y1='0'%20x2='1'%20y2='1'><stop%20offset='0'%20stop-color='%23046B52'/><stop%20offset='.55'%20stop-color='%230FA974'/><stop%20offset='1'%20stop-color='%237BE04A'/></linearGradient></defs><rect%20width='180'%20height='180'%20rx='40'%20fill='url(%23g)'/><circle%20cx='146'%20cy='34'%20r='42'%20fill='%23ffffff'%20opacity='.12'/><g%20transform='translate(90%2092)'><rect%20x='-46'%20y='-28'%20width='64'%20height='44'%20rx='6'%20fill='%23ffffff'/><path%20d='M18%20-14h16l12%2014v16H18z'%20fill='%23ffffff'%20opacity='.88'/><circle%20cx='-26'%20cy='24'%20r='10'%20fill='%23083E30'/><circle%20cx='32'%20cy='24'%20r='10'%20fill='%23083E30'/><circle%20cx='-26'%20cy='24'%20r='4.5'%20fill='%23ffffff'/><circle%20cx='32'%20cy='24'%20r='4.5'%20fill='%23ffffff'/></g></svg>">
 <link rel="icon" href="data:image/svg+xml,<svg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%20180%20180'><defs><linearGradient%20id='g'%20x1='0'%20y1='0'%20x2='1'%20y2='1'><stop%20offset='0'%20stop-color='%23046B52'/><stop%20offset='.55'%20stop-color='%230FA974'/><stop%20offset='1'%20stop-color='%237BE04A'/></linearGradient></defs><rect%20width='180'%20height='180'%20rx='40'%20fill='url(%23g)'/><circle%20cx='146'%20cy='34'%20r='42'%20fill='%23ffffff'%20opacity='.12'/><g%20transform='translate(90%2092)'><rect%20x='-46'%20y='-28'%20width='64'%20height='44'%20rx='6'%20fill='%23ffffff'/><path%20d='M18%20-14h16l12%2014v16H18z'%20fill='%23ffffff'%20opacity='.88'/><circle%20cx='-26'%20cy='24'%20r='10'%20fill='%23083E30'/><circle%20cx='32'%20cy='24'%20r='10'%20fill='%23083E30'/><circle%20cx='-26'%20cy='24'%20r='4.5'%20fill='%23ffffff'/><circle%20cx='32'%20cy='24'%20r='4.5'%20fill='%23ffffff'/></g></svg>">
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -246,15 +246,85 @@ button:active{transform:scale(.975)}
  color:var(--deep);cursor:pointer;border:1.5px solid transparent}
 .rc span:active{border-color:var(--mint);background:#DCF4E8}
 .rc-l{font-size:10.5px;font-weight:800;color:var(--mute);letter-spacing:.08em;margin-top:11px}
+
+/* ══ Holeka UI refresh — logic and fields above intentionally unchanged ══ */
+:root{
+ --lime:#9DE8C8; --mint:#159B75; --deep:#075B48; --ink:#102D28;
+ --coral:#E85A48; --sun:#E1A927; --grape:#6576B7;
+ --bg:#F6FAF8; --card:#FFFFFF; --mute:#6C817C; --line:#DCE8E3;
+}
+body{
+ background:var(--bg);
+ background-image:linear-gradient(180deg,#EEF8F3 0,#F7FBF9 340px,#F6FAF8 100%);
+ font-size:15px;
+}
+header{
+ min-height:184px;padding:calc(13px + env(safe-area-inset-top)) 20px 47px;
+ border-radius:0 0 28px 28px;
+ background:linear-gradient(135deg,#063F35 0%,#075B48 56%,#0C8568 100%);
+ box-shadow:0 8px 24px rgba(7,91,72,.22);
+}
+header::after{right:-55px;top:-70px;width:230px;height:230px;background:rgba(158,232,200,.10)}
+header::before{right:45px;bottom:-74px;width:150px;height:150px;background:rgba(255,255,255,.05)}
+.brand{position:relative;z-index:1;display:flex;align-items:center;gap:7px;font-size:13px;font-weight:900;letter-spacing:.13em}
+.brand-mark{width:21px;height:21px;display:grid;place-items:center;border-radius:7px;background:#B7F2D8;color:#075B48;font-size:16px;line-height:1;letter-spacing:0}
+.hd-tag{margin-top:17px;background:rgba(208,255,234,.13);border:1px solid rgba(211,255,235,.18);padding:4px 10px;font-size:9px;letter-spacing:.12em}
+.hd-t{font-size:27px;line-height:1.15;margin-top:9px;text-shadow:none;letter-spacing:-.035em}
+.hd-s{font-size:12.5px;opacity:.78;margin-top:4px}
+.ready{position:absolute;z-index:2;left:20px;right:20px;bottom:-18px;display:flex;align-items:center;gap:8px;padding:10px 13px;border-radius:14px;background:#EDFBF4;color:#087156;border:1px solid #CDEEDC;font-size:12px;font-weight:800;box-shadow:0 8px 20px rgba(6,63,53,.12)}
+.ready span{width:19px;height:19px;border-radius:50%;display:grid;place-items:center;color:#fff;background:#159B75;font-weight:900}
+.wrap{max-width:860px;padding:0 16px}
+.pull{margin-top:34px}
+.card{border:1px solid #E4EEEA;border-radius:18px;padding:17px 16px;margin-bottom:14px;box-shadow:0 3px 12px rgba(20,63,52,.055)}
+.ch{gap:11px;margin-bottom:16px}
+.ch .dot{width:38px;height:38px;border-radius:13px;background:#E8F8F1!important;color:#087156;box-shadow:none;font-size:18px}
+.ch .tt{font-size:16px;font-weight:850;color:#12362F}
+.ch .ss{font-size:11.5px;color:#72867F;margin-top:1px}
+.grid{gap:14px 12px}
+label{font-size:11px;color:#4C665E;text-transform:none;letter-spacing:.025em;margin-bottom:6px}
+input,select{height:49px;border-color:#D8E5E0;border-radius:12px;background:#FBFDFC;color:#17362F;font-size:15.5px}
+input:focus,select:focus{border-color:#159B75;background:#fff;box-shadow:0 0 0 3px rgba(21,155,117,.12)}
+input[type=file]{min-height:49px;padding:8px;border-color:#BFE4D3;background:#F9FCFB}
+input[type=file]::-webkit-file-upload-button{background:#E3F7ED;color:#087156;border:0;border-radius:8px;padding:7px 10px;margin-right:8px}
+.odo{min-height:97px;border-radius:15px;padding:15px 17px;background:linear-gradient(135deg,#E4F8EF,#CFF3E2);color:#075B48;box-shadow:none;border:1px solid #BCE7D3}
+.odo::after{background:rgba(21,155,117,.10)}
+.odo-l{color:#397165;opacity:1;font-size:10px}.odo-v{font-size:37px}.odo-u,.odo-b{color:#397165;opacity:1}
+.b-main{border-radius:14px;padding:16px;background:linear-gradient(135deg,#087157,#159B75);box-shadow:0 6px 15px rgba(7,91,72,.24)}
+.b-main:hover{box-shadow:0 8px 21px rgba(7,91,72,.3)}
+.b-g{background:#087157;box-shadow:0 3px 10px rgba(7,91,72,.19)}
+.b-o{background:#fff;border-color:#BFD9CF;color:#075B48}.b-s{background:#F0F6F3;color:#55726A}
+.tabs{padding:7px 12px calc(8px + env(safe-area-inset-bottom));gap:4px;background:rgba(255,255,255,.96);box-shadow:0 -2px 16px rgba(22,61,51,.08)}
+.tab{padding:8px 4px;color:#70827D;border-radius:12px}.tab.on{color:#087157;background:#E5F7EE;box-shadow:none}.tab .ic{font-size:18px}.tab .tx{font-size:11px}.pill{background:#E85A48}
+.lock{max-width:360px;margin:44px auto}.lock .em{background:#E5F7EE;color:#087157;box-shadow:none;border:1px solid #C5E9D8}.lock h3{color:#12362F}.lock input{background:#fff}
+.sync{border:1px solid transparent;border-radius:13px}.sync.ok{background:#E6F8EE;color:#087157;border-color:#CBECDC}.sync.off{background:#F1F5F3}.sync.err{background:#FFF1EF}
+.stats{gap:10px}.st,.sc{color:#143B32;border:1px solid #D8EBE2;box-shadow:none}.sa{background:#ECF8F2}.sb{background:#F4F8F6}.sc{background:#E1F6EC}.st::after{background:rgba(21,155,117,.08)}.st .k{color:#5E7B72;opacity:1;letter-spacing:.06em}.st .v{font-size:28px;color:#087157}.st .v small{color:#5E7B72;opacity:1}.baht{background:#E4F7ED;color:#087157}
+.rec{border:1px solid #E1ECE7;border-left:4px solid #159B75;border-radius:16px;box-shadow:0 2px 9px rgba(20,63,52,.045)}
+.rec:nth-child(4n+2),.rec:nth-child(4n+3),.rec:nth-child(4n+4){border-left-color:#159B75}.rec-n{background:#E6F7EF;color:#087157}.rec-b{padding:10px 14px 14px}.rec-nm{font-size:16px;color:#143B32}.chip,.chip.v{background:#ECF8F2;color:#28715D}.route{background:#F5FAF7;border-radius:11px;padding:10px;color:#315D51}.route .ar{color:#087157}.dist{background:#E2F7EC;color:#087157}.thumbs img{border-radius:10px;box-shadow:none;border:1px solid #DCEBE4}
+.empty .em{background:#E5F7EE;box-shadow:none;color:#087157}.srch{background:#F8FBF9}.strow:active{background:#F2F9F5}.strow .am{color:#087157}
+.inst{border:1px solid #DDEBE5;box-shadow:0 10px 28px rgba(20,63,52,.16)}
+.sug{border:1px solid #DCEAE4;box-shadow:0 8px 24px rgba(20,63,52,.14)}.sug b{background:#F5FAF7}.sug i:active,.sug i.hi{background:#EAF8F1}.sug i .km{background:#E1F6EC;color:#087157}.rc span{background:#EAF8F1;color:#087157}.rc span:active{border-color:#159B75}
+@media(min-width:700px){header{padding-left:max(28px,calc((100vw - 820px)/2));padding-right:max(28px,calc((100vw - 820px)/2))}.ready{left:max(28px,calc((100vw - 820px)/2));right:max(28px,calc((100vw - 820px)/2))}}
 @media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+
+/* ══ Delivery visual system — asset-led, vivid, and mobile first ══ */
+header{min-height:132px;padding:calc(12px + env(safe-area-inset-top)) 20px 29px;background:linear-gradient(118deg,#08735a 0%,#10af79 55%,#48cf68 120%)}
+.hd-tag{margin-top:13px;background:rgba(255,255,255,.20);border:0;font-size:9.5px}.hd-t{font-size:25px;margin-top:8px}.hd-s{font-size:12px;opacity:.88}.ready{display:none}.pull{margin-top:18px}
+.icon3d{width:40px;height:40px;object-fit:contain;display:block;flex:none}.ch .dot{padding:0;background:transparent!important;width:42px;height:42px;border-radius:0}.ch .dot .icon3d{width:42px;height:42px}.asset-sm{width:25px;height:25px;object-fit:contain;vertical-align:middle;margin-right:5px}.asset-tab{width:27px;height:27px;object-fit:contain;display:block;margin:0 auto 3px}
+.card{border:0;box-shadow:0 5px 20px rgba(4,107,82,.09)}
+.stats{gap:12px}.st,.sc{border:0;color:#fff;box-shadow:none}.sa{background:linear-gradient(125deg,#6C4BF6,#A78BFA)}.sb{background:linear-gradient(125deg,#FF6B4A,#FFB627)}.sc{background:linear-gradient(125deg,#047F64,#16C98A)}.st .k{color:#fff;opacity:.88}.st .v{color:#fff}.st .v small{color:#fff}.st::after{background:rgba(255,255,255,.15)}
+.odo{background:linear-gradient(120deg,#058468,#13bd85 60%,#64d85d 150%);color:#fff;border:0;box-shadow:0 7px 18px rgba(4,107,82,.22)}.odo-l,.odo-u,.odo-b{color:#fff}.odo::after{background:rgba(255,255,255,.13)}
+.tab.on{background:linear-gradient(120deg,#087157,#14c48a);color:#fff;box-shadow:0 4px 14px rgba(4,107,82,.2)}
+.action-icon{display:inline-flex;align-items:center;justify-content:center;width:28px;height:28px;vertical-align:middle;margin-right:5px}.action-icon .asset-sm{margin:0;width:28px;height:28px}
 </style>
 </head>
 <body>
 
 <header>
+ <div class="brand"><span class="brand-mark">↗</span><span>HOLEKA</span></div>
  <span class="hd-tag">BIG C SAINOI · 11252</span>
  <div class="hd-t">บันทึกการส่งสินค้า</div>
  <div class="hd-s">บันทึกระยะทางและหลักฐานการจัดส่ง</div>
+ <div class="ready"><span>✓</span> พร้อมบันทึก · ซิงค์อัตโนมัติ</div>
 </header>
 
 <!-- ══ กรอกข้อมูล ══ -->
@@ -262,7 +332,7 @@ button:active{transform:scale(.975)}
 <div class="wrap pull">
 
  <div class="card">
-  <div class="ch"><span class="dot d1">👤</span><div><div class="tt">ผู้ส่งและวันที่</div><div class="ss">ระบุผู้รับผิดชอบการส่ง</div></div></div>
+  <div class="ch"><span class="dot d1"><img class="icon3d" src="assets/sender.png" alt="ผู้ส่ง"></span><div><div class="tt">ผู้ส่งและวันที่</div><div class="ss">ระบุผู้รับผิดชอบการส่ง</div></div></div>
   <div class="grid">
    <div class="f"><label>วันที่ส่ง <span class="req">*</span></label><input type="date" id="f_date"></div>
    <div class="f"><label>ชื่อผู้ส่ง <span class="req">*</span></label>
@@ -276,7 +346,7 @@ button:active{transform:scale(.975)}
  </div>
 
  <div class="card">
-  <div class="ch"><span class="dot d2">🚚</span><div><div class="tt">ยานพาหนะ</div><div class="ss">รถที่ใช้ในการจัดส่ง</div></div></div>
+  <div class="ch"><span class="dot d2"><img class="icon3d" src="assets/vehicle.png" alt="ยานพาหนะ"></span><div><div class="tt">ยานพาหนะ</div><div class="ss">รถที่ใช้ในการจัดส่ง</div></div></div>
   <div class="grid">
    <div class="f"><label>ประเภทรถ</label><select id="f_veh">
     <option>รถมอเตอร์ไซค์</option><option>รถยนต์ส่วนตัว</option><option>รถกระบะ</option>
@@ -288,7 +358,7 @@ button:active{transform:scale(.975)}
  </div>
 
  <div class="card">
-  <div class="ch"><span class="dot d3">📍</span><div><div class="tt">เส้นทางและระยะทาง</div><div class="ss">กรอกแล้วคำนวณรวมให้อัตโนมัติ</div></div></div>
+  <div class="ch"><span class="dot d3"><img class="icon3d" src="assets/route.png" alt="เส้นทาง"></span><div><div class="tt">เส้นทางและระยะทาง</div><div class="ss">กรอกแล้วคำนวณรวมให้อัตโนมัติ</div></div></div>
   <div class="grid">
    <div class="f"><label>จุดเริ่มต้น</label>
      <input id="f_from" value="Big C ไทรน้อย" autocomplete="off">
@@ -309,7 +379,7 @@ button:active{transform:scale(.975)}
  </div>
 
  <div class="card">
-  <div class="ch"><span class="dot d4">📎</span><div><div class="tt">หลักฐานประกอบ</div><div class="ss">ใบเสร็จและรูปถ่าย</div></div></div>
+  <div class="ch"><span class="dot d4"><img class="icon3d" src="assets/receipt.png" alt="หลักฐาน"></span><div><div class="tt">หลักฐานประกอบ</div><div class="ss">ใบเสร็จและรูปถ่าย</div></div></div>
   <div class="grid">
    <div class="f"><label>เลขที่ใบเสร็จ</label>
      <input id="f_rec" placeholder="R110023928U300039" autocomplete="off"></div>
@@ -334,7 +404,7 @@ button:active{transform:scale(.975)}
 <div class="wrap" style="padding-top:16px">
 
  <div id="lockbox" class="lock">
-  <div class="em">🔐</div>
+  <div class="em"><img class="icon3d" src="assets/lock.png" alt="เข้าสู่ระบบ"></div>
   <h3>เข้าสู่ระบบ</h3>
   <p>หน้ารายงานแสดงข้อมูลการส่งของทั้งหมด<br>กรุณาเข้าสู่ระบบด้วยบัญชีของทีม</p>
   <input type="email" id="em" placeholder="อีเมล" autocomplete="username"
@@ -354,7 +424,7 @@ button:active{transform:scale(.975)}
   </div>
   <div class="st sc" style="margin-bottom:14px"><div class="k">ยอดเงินรวม</div><div class="v" id="s3">฿0.00</div></div>
   <div class="card">
-   <input class="srch" id="srch" placeholder="🔍 ค้นหา ชื่อ / แผนก / ปลายทาง / ใบเสร็จ" oninput="deb()">
+   <input class="srch" id="srch" placeholder="ค้นหา ชื่อ / แผนก / ปลายทาง / ใบเสร็จ" oninput="deb()">
    <div class="row">
     <select id="f_fdept" onchange="render()"><option value="">ทุกแผนก</option></select>
     <select id="f_fto" onchange="render()"><option value="">ทุกร้าน/ปลายทาง</option></select>
@@ -363,10 +433,10 @@ button:active{transform:scale(.975)}
     <button class="b-s" onclick="clrFilter()">✕ ล้างตัวกรอง</button>
    </div>
    <div class="row" style="margin-top:9px">
-    <button class="b-g" onclick="syncNow()">🔄 ซิงค์ข้อมูล</button>
-    <button class="b-o" onclick="fbTest()">🔌 ทดสอบเชื่อมต่อ</button>
-    <button class="b-g" onclick="xls()">ส่งออก Excel (มีรูป)</button>
-    <button class="b-o" onclick="csv()">ส่งออก CSV</button>
+    <button class="b-g" onclick="syncNow()"><span class="action-icon"><img class="asset-sm" src="assets/sync.png" alt=""></span>ซิงค์ข้อมูล</button>
+    <button class="b-o" onclick="fbTest()"><span class="action-icon"><img class="asset-sm" src="assets/connection.png" alt=""></span>ทดสอบเชื่อมต่อ</button>
+    <button class="b-g" onclick="xls()"><span class="action-icon"><img class="asset-sm" src="assets/excel.png" alt=""></span>ส่งออก Excel (มีรูป)</button>
+    <button class="b-o" onclick="csv()"><span class="action-icon"><img class="asset-sm" src="assets/csv.png" alt=""></span>ส่งออก CSV</button>
    </div>
    <div class="row" style="margin-top:9px">
     <button class="b-s" onclick="logout()">ออกจากระบบ</button>
@@ -375,7 +445,7 @@ button:active{transform:scale(.975)}
   </div>
   <div class="card" id="storeCard" style="display:none">
    <div class="ch" id="storeToggle" style="cursor:pointer;margin-bottom:0" onclick="toggleStoreSum()">
-    <span class="dot d3">🏬</span><div><div class="tt">สรุปยอดตามร้าน</div><div class="ss">รวมยอดเงินและระยะทางแยกตามปลายทาง</div></div>
+    <span class="dot d3"><img class="icon3d" src="assets/store.png" alt="ร้านค้า"></span><div><div class="tt">สรุปยอดตามร้าน</div><div class="ss">รวมยอดเงินและระยะทางแยกตามปลายทาง</div></div>
     <span id="storeChev" style="margin-left:auto;color:var(--mute);font-size:13px;transition:transform .2s">▾</span>
    </div>
    <div id="storeSum" style="overflow:hidden;max-height:2000px;transition:max-height .25s ease"></div>
@@ -391,8 +461,8 @@ button:active{transform:scale(.975)}
  <p>กดปุ่ม <svg class="sh" viewBox="0 0 24 24" fill="none" stroke="#046B52" stroke-width="2"><path d="M12 16V4M12 4L8 8M12 4l4 4"/><path d="M4 14v5a1 1 0 001 1h14a1 1 0 001-1v-5"/></svg> ด้านล่างของ Safari แล้วเลือก <b style="display:inline">เพิ่มไปยังหน้าจอโฮม</b></p>
 </div>
 <div class="tabs">
- <div class="tab on" id="t1" onclick="go(1)"><span class="ic">✏️</span><span class="tx">กรอกข้อมูล</span></div>
- <div class="tab" id="t2" onclick="go(2)"><span class="ic">📊</span><span class="tx">รายงาน<span class="pill" id="cnt">0</span></span></div>
+ <div class="tab on" id="t1" onclick="go(1)"><span class="ic"><img class="asset-tab" src="assets/receipt.png" alt=""></span><span class="tx">กรอกข้อมูล</span></div>
+ <div class="tab" id="t2" onclick="go(2)"><span class="ic"><img class="asset-tab" src="assets/report.png" alt=""></span><span class="tx">รายงาน<span class="pill" id="cnt">0</span></span></div>
 </div>
 
 <script>
@@ -680,7 +750,7 @@ function render(reset){
  }
  var filtered=!!(q||fDept||fTo);
  if(match.length>lim)h.push('<button class="b-o" style="width:100%;margin-bottom:12px" onclick="more()">แสดงเพิ่ม ('+(match.length-lim)+' รายการ)</button>');
- $('list').innerHTML=h.join('')||'<div class="empty"><div class="em">'+(filtered?'🔍':'📦')+'</div><b>'+(filtered?'ไม่พบรายการที่ตรงเงื่อนไข':'ยังไม่มีรายการบันทึก')+'</b><span>'+(filtered?'ลองปรับคำค้นหรือตัวกรอง':'เริ่มบันทึกได้ที่แท็บกรอกข้อมูล')+'</span></div>';
+ $('list').innerHTML=h.join('')||'<div class="empty"><div class="em"><img class="icon3d" src="assets/'+(filtered?'search.png':'vehicle.png')+'" alt=""></div><b>'+(filtered?'ไม่พบรายการที่ตรงเงื่อนไข':'ยังไม่มีรายการบันทึก')+'</b><span>'+(filtered?'ลองปรับคำค้นหรือตัวกรอง':'เริ่มบันทึกได้ที่แท็บกรอกข้อมูล')+'</span></div>';
  $('s1').innerHTML=match.length+'<small>รายการ</small>';
  $('s2').innerHTML=t.toFixed(1)+'<small>กม.</small>';
  if($('s3'))$('s3').innerHTML='฿'+money(sumAmt);
