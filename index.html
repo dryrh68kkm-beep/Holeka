@@ -659,7 +659,21 @@ function openMapPicker(target){
  initLongdoMap(start);
 }
 function closeMapPicker(){$('mapModal').className='mapmodal';mmTarget=null}
+function errText(e){
+ try{
+  if(!e)return 'ไม่ทราบสาเหตุ';
+  if(e.message)return e.message;
+  if(typeof e==='string')return e;
+  return JSON.stringify(e);
+ }catch(x){return 'ไม่ทราบสาเหตุ'}
+}
 function initLongdoMap(center){
+ if(typeof longdo==='undefined'){
+  $('mapEl').innerHTML='<div style="padding:20px;text-align:center;color:var(--mute);font-size:13px">'
+   +'โหลดไลบรารีแผนที่ Longdo ไม่สำเร็จ<br>สาเหตุที่เป็นไปได้: ไม่มีสัญญาณอินเทอร์เน็ต หรือ API Key ไม่ได้ตั้งค่าโดเมนที่อนุญาตให้ถูกต้อง<br>'
+   +'(โดเมนของแอปนี้คือ dryrh68kkm-beep.github.io)</div>';
+  return;
+ }
  try{
   if(!mmMap){
    mmMap=new longdo.Map({placeholder:$('mapEl')});
@@ -672,7 +686,8 @@ function initLongdoMap(center){
   mmMap.zoom(16,true);
   setMmMarker(center);
  }catch(e){
-  $('mapEl').innerHTML='<div style="padding:20px;text-align:center;color:var(--mute);font-size:13px">โหลดแผนที่ไม่สำเร็จ: '+esc(e.message||'')+'</div>';
+  console.error('Longdo map init error',e);
+  $('mapEl').innerHTML='<div style="padding:20px;text-align:center;color:var(--mute);font-size:13px">โหลดแผนที่ไม่สำเร็จ: '+esc(errText(e))+'</div>';
  }
 }
 function setMmMarker(loc){
