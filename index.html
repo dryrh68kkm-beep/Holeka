@@ -622,7 +622,7 @@ function calc(){
 /* ═══ ปักหมุดจากแผนที่ (Longdo Map) ═══ */
 var LONGDO_KEY='d028a178d4bd78b2dc7b3a31f414eb7f';
 var PIN={from:null,to:null};   /* {lat,lon} */
-var mmTarget=null, mmMap=null, mmMarker=null;
+var mmTarget=null, mmMap=null, mmMarker=null, mmMarkerLoc=null;
 try{
  var savedOrigin=JSON.parse(localStorage.getItem('bigc_origin_pin')||'null');
  if(savedOrigin)PIN.from=savedOrigin;
@@ -667,6 +667,16 @@ function errText(e){
   return JSON.stringify(e);
  }catch(x){return 'ไม่ทราบสาเหตุ'}
 }
+/* อ่านตำแหน่ง {lat,lon} จาก event/overlay ของ Longdo แบบยืดหยุ่น เผื่อรูปแบบต่างกันตามเวอร์ชัน */
+function extractLoc(x){
+ if(!x)return null;
+ if(typeof x.lat==='number'&&typeof x.lon==='number')return {lat:x.lat,lon:x.lon};
+ if(x.location){
+  if(typeof x.location==='function'){try{var l=x.location();if(l)return {lat:l.lat,lon:l.lon}}catch(e){}}
+  else if(typeof x.location.lat==='number')return {lat:x.location.lat,lon:x.location.lon};
+ }
+ return null;
+}
 function initLongdoMap(center){
  if(typeof longdo==='undefined'){
   $('mapEl').innerHTML='<div style="padding:20px;text-align:center;color:var(--mute);font-size:13px">'
@@ -677,9 +687,9 @@ function initLongdoMap(center){
  try{
   if(!mmMap){
    mmMap=new longdo.Map({placeholder:$('mapEl')});
-   mmMap.Event.bind(longdo.Event.Click,function(mouse){
-    var loc=mmMap.location(mouse,true);
-    setMmMarker(loc);
+   mmMap.Event.bind('click',function(ev){
+    var loc=extractLoc(ev)||extractLoc(mmMap.location(ev,true));
+    if(loc)setMmMarker(loc);
    });
   }
   mmMap.location(center,true);
@@ -694,11 +704,15 @@ function setMmMarker(loc){
  if(!mmMap)return;
  try{
   if(mmMarker)mmMap.Overlays.remove(mmMarker);
+  mmMarkerLoc=loc;
   mmMarker=new longdo.Marker(loc,{draggable:true});
   mmMap.Overlays.add(mmMarker);
   try{
-   mmMap.Event.bind(longdo.Event.OverlayDrop,function(ov){
-    if(ov===mmMarker){/* ตำแหน่งอัปเดตเองผ่าน ov.location() ตอนกดยืนยัน */}
+   mmMap.Event.bind('overlayDrop',function(ov){
+    if(ov===mmMarker||(ov&&ov._id===mmMarker)){
+     var l=extractLoc(ov);
+     if(l)mmMarkerLoc=l;
+    }
    });
   }catch(e){}
  }catch(e){}
@@ -713,8 +727,7 @@ function useGpsPin(){
 }
 function confirmMapPin(){
  if(!mmMarker){toast('กรุณาแตะบนแผนที่เพื่อปักหมุดก่อน',1);return}
- var loc;
- try{loc=mmMarker.location()}catch(e){loc=null}
+ var loc=mmMarkerLoc||extractLoc(mmMarker);
  if(!loc){toast('อ่านตำแหน่งหมุดไม่สำเร็จ',1);return}
  PIN[mmTarget]={lat:loc.lat,lon:loc.lon};
  if(mmTarget==='from'){
