@@ -1389,10 +1389,14 @@ function pullAll(){
    }
    var docs=j.documents||[],byId={};
    for(var i=0;i<rows.length;i++)byId[rows[i].id]=rows[i];
+   /* รายการที่ลบในเครื่องแล้วแต่ยังส่งลบขึ้นเซิร์ฟเวอร์ไม่สำเร็จ — ห้ามดึงกลับมาใหม่ */
+   var pendingDel={};
+   qGet().forEach(function(it){if(it.op==='del')pendingDel[it.id]=1});
    var added=0;
    for(var i=0;i<docs.length;i++){
     var o=fromFs(docs[i]);
     var id=docs[i].name.split('/').pop();
+    if(pendingDel[id])continue;
     o.id=id;
     if(byId[id]){
      /* ของในเครื่องมีอยู่แล้ว: เก็บ thumbnail เดิมไว้ */
